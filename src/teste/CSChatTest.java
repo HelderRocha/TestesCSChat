@@ -12,9 +12,9 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import sun.rmi.runtime.Log;
 
 import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
 
 public class CSChatTest {
 
@@ -59,16 +59,18 @@ public class CSChatTest {
 		}
 	}
 
-	private  void Login(int ind) {
+    private void Login(int ind, String username, String password) {
         Calendar cal = Calendar.getInstance();
-		String username = "usuario" + cal.getTimeInMillis();
-		String password = "senha";
 
-		WebDriver driver = GetDriver(ind);
+        WebDriver driver = GetDriver(ind);
 
-		driver.findElement(By.cssSelector("input[name=\"username\"]")).sendKeys(username);
-		driver.findElement(By.cssSelector("input[name=\"password\"]")).sendKeys(password);
+        driver.findElement(By.cssSelector("input[name=\"username\"]")).sendKeys(username);
+        driver.findElement(By.cssSelector("input[name=\"password\"]")).sendKeys(password);
         driver.findElement(By.cssSelector("input[value=\"[login]\"]")).click();
+    }
+
+	private void Login(int ind) {
+	    Login(ind, "usuario", "senha");
     }
 
 	private  void Mensagem(int ind) {
@@ -110,7 +112,7 @@ public class CSChatTest {
 
 		switchDriverToFrameSource(driver, "messages");
 		assertTrue(driver.getPageSource().indexOf("You just created " + roomName + ".") > 0);
-		closeDrivers();
+		switchDriverBackToDefault(driver);
 	}
 
     @Test
@@ -121,7 +123,18 @@ public class CSChatTest {
 
         switchDriverToFrameSource(driver, "messages");
         assertTrue(driver.getPageSource().indexOf("Please obey the netiquette.") > 0);
-        closeDrivers();
+        switchDriverBackToDefault(driver);
+    }
+
+    @Test
+    public void LoginTestFail() {
+	    int i = 1;
+	    WebDriver driver = GetDriver(i);
+        Login(1, "", "password");
+
+        switchDriverToFrameSource(driver, "messages");
+        assertTrue(!driver.getPageSource().contains("Please obey the netiquette."));
+        switchDriverBackToDefault(driver);
     }
 
 	@Test
@@ -132,7 +145,7 @@ public class CSChatTest {
 		sendCommandViaChat(driver, "Oi!");
 		switchDriverToFrameSource(driver, "messages");
 		assertTrue(driver.getPageSource().indexOf("Oi!") > 0);
-		closeDrivers();
+		switchDriverBackToDefault(driver);
 	}
 
 
@@ -144,7 +157,7 @@ public class CSChatTest {
         sendCommandViaChat(driver, "/s Oi!");
         switchDriverToFrameSource(driver, "messages");
         assertTrue(driver.getPageSource().indexOf("shouts out OI!") > 0);
-        closeDrivers();
+        switchDriverBackToDefault(driver);
     }
 
 
@@ -156,7 +169,6 @@ public class CSChatTest {
         switchDriverToFrameSource(driver, "messages");
         assertTrue(driver.getPageSource().indexOf("You have just joined " + roomName + ".") > 0);
         switchDriverBackToDefault(driver);
-        closeDrivers();
     }
 
     private  void sendCommandViaChat(WebDriver driver, String command) {
